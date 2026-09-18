@@ -1,0 +1,719 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>五年級中文大冒險・詞語智多星</title>
+    <style>
+        :root {
+            --primary: #ff7675;
+            --primary-dark: #d63031;
+            --secondary: #74b9ff;
+            --secondary-dark: #0984e3;
+            --accent: #ffeaa7;
+            --accent-dark: #fdcb6e;
+            --success: #55efc4;
+            --success-dark: #00b894;
+            --danger: #ff7675;
+            --text: #2d3436;
+            --card-bg: #ffffff;
+        }
+
+        * {
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        body {
+            margin: 0;
+            padding: 16px;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+            font-family: "Chalkboard SE", "Comic Sans MS", "PingFang TC", "Microsoft JhengHei", sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: var(--text);
+        }
+
+        .game-container {
+            width: 100%;
+            max-width: 680px;
+            background: var(--card-bg);
+            border-radius: 28px;
+            padding: 24px 30px;
+            box-shadow: 0 16px 32px rgba(0, 0, 0, 0.12), 0 6px 0px #b2bec3;
+            border: 4px solid #fff;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* 頂部裝飾角標 */
+        .badge-mascot {
+            font-size: 32px;
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            animation: bounce 2s infinite ease-in-out;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-8px) rotate(6deg); }
+        }
+
+        /* 歡迎頁與結束頁 */
+        .screen {
+            display: none;
+            text-align: center;
+            animation: fadeIn 0.4s ease;
+        }
+
+        .screen.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.96); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        .game-title {
+            font-size: 32px;
+            color: #d63031;
+            margin: 10px 0 15px;
+            text-shadow: 2px 2px 0px #ffeaa7;
+            letter-spacing: 1px;
+        }
+
+        .subtitle {
+            font-size: 17px;
+            color: #636e72;
+            margin-bottom: 25px;
+            line-height: 1.6;
+        }
+
+        /* 頂部狀態列 */
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 3px dashed #dfe6e9;
+        }
+
+        .stat-badge {
+            background: #f1f2f6;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 15px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .progress-wrap {
+            flex: 1;
+            margin: 0 15px;
+            background: #dfe6e9;
+            height: 16px;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 2px solid #b2bec3;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #fdcb6e, #00b894);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        /* 題目卡片 */
+        .question-card {
+            background: #fff9e6;
+            border: 3px solid #ffeaa7;
+            border-radius: 20px;
+            padding: 22px;
+            margin-bottom: 22px;
+            font-size: 20px;
+            line-height: 1.85;
+            text-align: justify;
+            color: #2c3e50;
+            position: relative;
+            box-shadow: 0 6px 0 #fad390;
+        }
+
+        .highlight-blank {
+            display: inline-block;
+            min-width: 90px;
+            border-bottom: 3px dashed #e17055;
+            color: #d63031;
+            font-weight: bold;
+            text-align: center;
+            padding: 0 8px;
+            margin: 0 4px;
+            background: #ffeaa7;
+            border-radius: 6px;
+        }
+
+        .idiom-tag {
+            color: #0984e3;
+            font-weight: bold;
+            background: rgba(116, 185, 255, 0.18);
+            padding: 2px 6px;
+            border-radius: 6px;
+        }
+
+        /* 選項網格 */
+        .options-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+            margin-bottom: 20px;
+        }
+
+        .option-btn {
+            background: #ffffff;
+            border: 3px solid #74b9ff;
+            border-radius: 16px;
+            padding: 14px 10px;
+            font-size: 19px;
+            font-weight: bold;
+            color: #0984e3;
+            cursor: pointer;
+            outline: none;
+            transition: all 0.1s ease;
+            box-shadow: 0 5px 0 #74b9ff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .option-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 7px 0 #74b9ff;
+            background: #f0f8ff;
+        }
+
+        .option-btn:active:not(:disabled) {
+            transform: translateY(4px);
+            box-shadow: 0 1px 0 #74b9ff;
+        }
+
+        .option-btn.correct {
+            background: #55efc4 !important;
+            border-color: #00b894 !important;
+            color: #006241 !important;
+            box-shadow: 0 5px 0 #00b894 !important;
+        }
+
+        .option-btn.wrong {
+            background: #ff7675 !important;
+            border-color: #d63031 !important;
+            color: #ffffff !important;
+            box-shadow: 0 5px 0 #d63031 !important;
+            animation: shake 0.4s ease;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-6px); }
+            40%, 80% { transform: translateX(6px); }
+        }
+
+        /* 回饋與控制區 */
+        .feedback-box {
+            min-height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-top: 10px;
+        }
+
+        .feedback-text {
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .feedback-text.correct-msg { color: #00b894; }
+        .feedback-text.wrong-msg { color: #d63031; }
+
+        /* 卡通按鈕樣式 */
+        .btn-cartoon {
+            background: #ff7675;
+            border: none;
+            border-radius: 50px;
+            padding: 12px 34px;
+            color: white;
+            font-size: 20px;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 6px 0 #d63031;
+            transition: all 0.1s ease;
+        }
+
+        .btn-cartoon:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 0 #d63031;
+        }
+
+        .btn-cartoon:active {
+            transform: translateY(4px);
+            box-shadow: 0 2px 0 #d63031;
+        }
+
+        /* 結算頁面特別裝飾 */
+        .score-circle {
+            width: 140px;
+            height: 140px;
+            border-radius: 50%;
+            background: #ffeaa7;
+            border: 6px solid #fdcb6e;
+            margin: 20px auto;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            font-size: 40px;
+            font-weight: bold;
+            color: #d63031;
+            box-shadow: 0 8px 0 #fab1a0;
+        }
+
+        .score-circle small {
+            font-size: 16px;
+            color: #636e72;
+        }
+
+        .stars-row {
+            font-size: 38px;
+            margin-bottom: 16px;
+        }
+
+        /* 彩帶畫布 */
+        #confetti-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+
+        @media (max-width: 520px) {
+            .options-grid { grid-template-columns: 1fr; gap: 10px; }
+            .question-card { font-size: 18px; padding: 16px; }
+            .game-title { font-size: 26px; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="game-container">
+    <canvas id="confetti-canvas"></canvas>
+    <div class="badge-mascot" id="mascot">🐞</div>
+
+    <!-- 1. 開始畫面 -->
+    <div id="start-screen" class="screen active">
+        <div style="font-size: 60px; margin-top: 10px;">🦋 ⭐ 🐞</div>
+        <h1 class="game-title">五年級詞語大冒險</h1>
+        <p class="subtitle">
+            歡迎來到詞語森林！這裡有 <b>21 道</b> 精選成語挑戰關卡。<br>
+            動動腦筋，選擇最恰當的字詞填入句子中，成為詞語大師吧！
+        </p>
+        <button class="btn-cartoon" onclick="startGame()">🚀 開始挑戰！</button>
+    </div>
+
+    <!-- 2. 答題畫面 -->
+    <div id="quiz-screen" class="screen">
+        <div class="top-bar">
+            <div class="stat-badge">
+                <span>📝 題號:</span>
+                <span id="question-index">1/21</span>
+            </div>
+            <div class="progress-wrap">
+                <div class="progress-bar" id="progress-bar"></div>
+            </div>
+            <div class="stat-badge">
+                <span>⭐ 得分:</span>
+                <span id="current-score" style="color: #e17055;">0</span>
+            </div>
+        </div>
+
+        <div class="question-card" id="question-text">
+            載入題目中...
+        </div>
+
+        <div class="options-grid" id="options-container">
+            <!-- 選項會動態載入 -->
+        </div>
+
+        <div class="feedback-box">
+            <div class="feedback-text" id="feedback-text"></div>
+            <button class="btn-cartoon" id="next-btn" style="display: none; padding: 8px 24px; font-size: 17px;" onclick="nextQuestion()">下一題 ➔</button>
+        </div>
+    </div>
+
+    <!-- 3. 結束畫面 -->
+    <div id="result-screen" class="screen">
+        <div class="stars-row" id="result-stars">⭐⭐⭐</div>
+        <h2 class="game-title" id="result-title">冒險完成！</h2>
+        
+        <div class="score-circle">
+            <span id="final-score">100</span>
+            <small>總得分</small>
+        </div>
+
+        <p class="subtitle" id="result-desc">太厲害了！你對字詞的理解非常深刻！</p>
+        <button class="btn-cartoon" onclick="startGame()">🔄 再玩一次</button>
+    </div>
+</div>
+
+<script>
+    // 題目資料庫（共21題，包含原圖詞彙、>=30字詳細情境、四字詞語/成語標籤）
+    const questions = [
+        {
+            text: "老李在候車亭撿到一個裝有數十萬元的背包，面對這筆天降的【　　】，他非但沒有心生貪念，反而<span class='idiom-tag'>小心翼翼</span>地將它交給值班警員。",
+            ans: "巨款",
+            options: ["巨款", "報酬", "道理", "規定"]
+        },
+        {
+            text: "發生重大火災事故後，各大電視台的【　　】紛紛<span class='idiom-tag'>爭先恐後</span>地趕抵現場，為廣大市民播報第一手的新聞訊息。",
+            ans: "記者",
+            options: ["管理員", "警察", "記者", "榜樣"]
+        },
+        {
+            text: "在奧運會勇奪金牌的運動員一下飛機，便受到傳媒熱情的圍堵與【　　】，他<span class='idiom-tag'>謙虛有禮</span>地向大眾表達由衷的感謝。",
+            ans: "採訪",
+            options: ["採訪", "監督", "經歷", "規定"]
+        },
+        {
+            text: "校園小記者趁著校慶活動的空檔，主動前去【　　】<span class='idiom-tag'>德高望重</span>的退休老校長，請他細說創校初期的感人點滴。",
+            ans: "訪問",
+            options: ["具備", "領悟", "訪問", "採訪"]
+        },
+        {
+            text: "班長處理班級事務一向秉持<span class='idiom-tag'>大公無私</span>的【　　】，無論違規的是要好朋友還是普通同學，他都<span class='idiom-tag'>一視同仁</span>地公正處理。",
+            ans: "原則",
+            options: ["原則", "經歷", "報酬", "榜樣"]
+        },
+        {
+            text: "陳伯伯在公園長凳上撿到昂貴的手錶後立刻交到服務台歸還失主，他這種【　　】的高尚品行贏得鄰里的一致<span class='idiom-tag'>讚不絕口</span>。",
+            ans: "拾金不昧",
+            options: ["據為己有", "拾金不昧", "不耐煩", "難為情"]
+        },
+        {
+            text: "弟弟因為拼圖總是拼湊失敗而漸漸顯得有些【　　】，甚至<span class='idiom-tag'>氣急敗壞</span>地想放棄，幸好媽媽在身旁耐心引導他冷靜下來。",
+            ans: "不耐煩",
+            options: ["難為情", "不耐煩", "拾金不昧", "撓撓頭"]
+        },
+        {
+            text: "大廈的【　　】每天都<span class='idiom-tag'>兢兢業業</span>地巡查各個出入口與樓層，時刻守護著所有住戶的居家平安與環境整潔。",
+            ans: "管理員",
+            options: ["警察", "記者", "榜樣", "管理員"]
+        },
+        {
+            text: "面對老師在黑板上寫出的這道奧數難題，原本<span class='idiom-tag'>胸有成竹</span>的小明不禁感到<span class='idiom-tag'>百思不解</span>，只能尷尬地【　　】。",
+            ans: "撓撓頭",
+            options: ["不耐煩", "撓撓頭", "難為情", "據為己有"]
+        },
+        {
+            text: "經過教練數週的<span class='idiom-tag'>循循善誘</span>與示範，小剛終於<span class='idiom-tag'>恍然大悟</span>，成功【　　】了游泳換氣的要訣，游得更加<span class='idiom-tag'>輕鬆自如</span>。",
+            ans: "領悟",
+            options: ["具備", "領悟", "經歷", "監督"]
+        },
+        {
+            text: "爺爺經常藉由寓言故事耐心地告誡我們要懂得做人的【　　】，從小就要分清<span class='idiom-tag'>是非黑白</span>，成長為頂天立地的男子漢。",
+            ans: "道理",
+            options: ["原則", "道理", "規定", "報酬"]
+        },
+        {
+            text: "想要成為一名品學兼優的模範生，除了要有優異的課業成績，還必須【　　】<span class='idiom-tag'>熱心助人</span>的熱忱與負責任的態度。",
+            ans: "具備",
+            options: ["領悟", "經歷", "具備", "自律"]
+        },
+        {
+            text: "姊姊從小就養成高度【　　】的作息習慣，每天放學回家總是<span class='idiom-tag'>自動自發</span>地完成功課，從不需父母在一旁嘮叨催促。",
+            ans: "自律",
+            options: ["自律", "監督", "規定", "經歷"]
+        },
+        {
+            text: "陳老師在班會課上與我們<span class='idiom-tag'>侃侃而談</span>，細心分享他求學時期遠赴異國生活的難忘【　　】，大家聽得<span class='idiom-tag'>津津有味</span>。",
+            ans: "經歷",
+            options: ["道理", "報酬", "原則", "經歷"]
+        },
+        {
+            text: "做人處事應當<span class='idiom-tag'>光明磊落</span>，在路上撿到他人的貴重財物時，絕不可因一時貪念而將其【　　】，以免違法受罰。",
+            ans: "據為己有",
+            options: ["拾金不昧", "據為己有", "難為情", "不耐煩"]
+        },
+        {
+            text: "數名<span class='idiom-tag'>身手矯健</span>的【　　】接獲民眾通報後火速出動，迅速制服了街頭持械搶劫的歹徒，化解了危機。",
+            ans: "警察",
+            options: ["管理員", "警察", "記者", "榜樣"]
+        },
+        {
+            text: "義工們長年累月<span class='idiom-tag'>任勞任怨</span>地照顧獨居長者，從不求任何實質的名利或金錢【　　】，這份<span class='idiom-tag'>無私奉獻</span>令人敬佩。",
+            ans: "報酬",
+            options: ["巨款", "經歷", "報酬", "原則"]
+        },
+        {
+            text: "小儀不但<span class='idiom-tag'>品學兼優</span>，平時待人更是謙遜友善，是全班同學心目中公認值得學習的優秀好【　　】。",
+            ans: "榜樣",
+            options: ["榜樣", "原則", "道理", "管理員"]
+        },
+        {
+            text: "校規裡清清楚楚地【　　】學生在校期間必須穿著整齊校服，全校師生皆嚴格遵守，展現出<span class='idiom-tag'>井然有序</span>的精神面貌。",
+            ans: "規定",
+            options: ["監督", "具備", "原則", "規定"]
+        },
+        {
+            text: "為了確保新圖書館能夠安全且如期完工，學校委派工程專家在施工現場進行嚴密【　　】，務求做到<span class='idiom-tag'>一絲不苟</span>。",
+            ans: "監督",
+            options: ["自律", "監督", "規定", "經歷"]
+        },
+        {
+            text: "小明不小心把為好友籌備驚喜派對的秘密說漏了嘴，頓時感到無比【　　】，羞得<span class='idiom-tag'>面紅耳赤</span>、低頭不語。",
+            ans: "難為情",
+            options: ["不耐煩", "撓撓頭", "難為情", "據為己有"]
+        }
+    ];
+
+    let currentQ = 0;
+    let score = 0;
+    let combo = 0;
+    let answered = false;
+
+    // 音效合成器 (Web Audio API - 無需外部檔案)
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    function playSound(type) {
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+
+        const now = audioCtx.currentTime;
+        if (type === 'correct') {
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(523.25, now); // C5
+            osc.frequency.setValueAtTime(659.25, now + 0.08); // E5
+            osc.frequency.setValueAtTime(783.99, now + 0.16); // G5
+            gain.gain.setValueAtTime(0.2, now);
+            gain.gain.exponentialRampToValueAtTime(0.01, now + 0.35);
+            osc.start(now);
+            osc.stop(now + 0.35);
+        } else if (type === 'wrong') {
+            osc.type = 'sawtooth';
+            osc.frequency.setValueAtTime(220, now);
+            osc.frequency.linearRampToValueAtTime(150, now + 0.25);
+            gain.gain.setValueAtTime(0.2, now);
+            gain.gain.exponentialRampToValueAtTime(0.01, now + 0.25);
+            osc.start(now);
+            osc.stop(now + 0.25);
+        } else if (type === 'fanfare') {
+            const freqs = [523, 659, 783, 1046];
+            freqs.forEach((f, idx) => {
+                const subOsc = audioCtx.createOscillator();
+                const subGain = audioCtx.createGain();
+                subOsc.connect(subGain);
+                subGain.connect(audioCtx.destination);
+                subOsc.frequency.setValueAtTime(f, now + idx * 0.1);
+                subGain.gain.setValueAtTime(0.15, now + idx * 0.1);
+                subGain.gain.exponentialRampToValueAtTime(0.01, now + idx * 0.1 + 0.3);
+                subOsc.start(now + idx * 0.1);
+                subOsc.stop(now + idx * 0.1 + 0.3);
+            });
+        }
+    }
+
+    function switchScreen(screenId) {
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        document.getElementById(screenId).classList.add('active');
+    }
+
+    function startGame() {
+        currentQ = 0;
+        score = 0;
+        combo = 0;
+        document.getElementById('current-score').textContent = '0';
+        switchScreen('quiz-screen');
+        loadQuestion();
+    }
+
+    function loadQuestion() {
+        answered = false;
+        const q = questions[currentQ];
+        
+        // 更新頂部資訊
+        document.getElementById('question-index').textContent = `${currentQ + 1}/${questions.length}`;
+        const pct = ((currentQ) / questions.length) * 100;
+        document.getElementById('progress-bar').style.width = `${pct}%`;
+
+        // 題目文字
+        const renderText = q.text.replace('【　　】', `<span class="highlight-blank" id="blank-slot">？</span>`);
+        document.getElementById('question-text').innerHTML = renderText;
+
+        // 洗牌選項
+        const shuffled = [...q.options].sort(() => Math.random() - 0.5);
+        const container = document.getElementById('options-container');
+        container.innerHTML = '';
+
+        const letters = ['A', 'B', 'C', 'D'];
+        shuffled.forEach((opt, idx) => {
+            const btn = document.createElement('button');
+            btn.className = 'option-btn';
+            btn.innerHTML = `<span style="opacity:0.6">${letters[idx]}.</span> ${opt}`;
+            btn.onclick = () => checkAnswer(opt, btn);
+            container.appendChild(btn);
+        });
+
+        // 重置回饋
+        document.getElementById('feedback-text').textContent = '';
+        document.getElementById('feedback-text').className = 'feedback-text';
+        document.getElementById('next-btn').style.display = 'none';
+
+        // 吉祥物變換
+        const mascots = ['🐞', '🦋', '🐝', '🌟', '🐣'];
+        document.getElementById('mascot').textContent = mascots[currentQ % mascots.length];
+    }
+
+    function checkAnswer(selected, buttonElem) {
+        if (answered) return;
+        answered = true;
+
+        const q = questions[currentQ];
+        const buttons = document.querySelectorAll('.option-btn');
+        const blank = document.getElementById('blank-slot');
+        const feedback = document.getElementById('feedback-text');
+
+        // 禁用按鈕
+        buttons.forEach(btn => btn.disabled = true);
+
+        if (selected === q.ans) {
+            playSound('correct');
+            buttonElem.classList.add('correct');
+            blank.textContent = selected;
+            blank.style.color = '#00b894';
+            blank.style.borderColor = '#00b894';
+
+            combo++;
+            let earned = 10;
+            if (combo > 1) earned += 2; // 連勝加分
+            score += earned;
+            document.getElementById('current-score').textContent = score;
+
+            feedback.className = 'feedback-text correct-msg';
+            feedback.innerHTML = combo > 1 ? `🎉 太棒了！答對了！(連勝 x${combo})` : `🎉 太棒了！答對了！`;
+        } else {
+            playSound('wrong');
+            buttonElem.classList.add('wrong');
+            blank.textContent = q.ans;
+            blank.style.color = '#d63031';
+
+            // 標示正確答案
+            buttons.forEach(btn => {
+                if (btn.textContent.includes(q.ans)) {
+                    btn.classList.add('correct');
+                }
+            });
+
+            combo = 0;
+            feedback.className = 'feedback-text wrong-msg';
+            feedback.innerHTML = `💡 差一點點！正確答案是「<b>${q.ans}</b>」`;
+        }
+
+        document.getElementById('next-btn').style.display = 'inline-block';
+    }
+
+    function nextQuestion() {
+        currentQ++;
+        if (currentQ < questions.length) {
+            loadQuestion();
+        } else {
+            showResult();
+        }
+    }
+
+    function showResult() {
+        document.getElementById('progress-bar').style.width = '100%';
+        switchScreen('result-screen');
+        playSound('fanfare');
+        startConfetti();
+
+        const totalPossible = questions.length * 10;
+        const finalScoreElem = document.getElementById('final-score');
+        finalScoreElem.textContent = score;
+
+        const starsElem = document.getElementById('result-stars');
+        const titleElem = document.getElementById('result-title');
+        const descElem = document.getElementById('result-desc');
+
+        if (score >= totalPossible * 0.9) {
+            starsElem.textContent = '⭐⭐⭐';
+            titleElem.textContent = '👑 詞語至尊大師！';
+            descElem.textContent = '太不可思議了！你具備極佳的成語積累與語感，完美通關！';
+        } else if (score >= totalPossible * 0.6) {
+            starsElem.textContent = '⭐⭐';
+            titleElem.textContent = '🏅 優秀詞語達人！';
+            descElem.textContent = '表現非常亮眼！只要再稍微細心體會句意，就能拿到滿分囉！';
+        } else {
+            starsElem.textContent = '⭐';
+            titleElem.textContent = '🌱 努力學習新星！';
+            descElem.textContent = '多閱讀、多練習，將這些詞語記在腦海中，再來挑戰一次吧！';
+        }
+    }
+
+    // 彩帶紙屑特效
+    function startConfetti() {
+        const canvas = document.getElementById('confetti-canvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = canvas.parentElement.clientWidth;
+        canvas.height = canvas.parentElement.clientHeight;
+
+        const pieces = [];
+        const colors = ['#ff7675', '#74b9ff', '#55efc4', '#ffeaa7', '#a29bfe', '#fd79a8'];
+        for (let i = 0; i < 60; i++) {
+            pieces.push({
+                x: Math.random() * canvas.width,
+                y: Math.random() * canvas.height - canvas.height,
+                size: Math.random() * 8 + 4,
+                color: colors[Math.floor(Math.random() * colors.length)],
+                speed: Math.random() * 3 + 2,
+                rotation: Math.random() * 360
+            });
+        }
+
+        let animationFrame;
+        function update() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            pieces.forEach(p => {
+                p.y += p.speed;
+                p.rotation += 2;
+                ctx.save();
+                ctx.translate(p.x, p.y);
+                ctx.rotate((p.rotation * Math.PI) / 180);
+                ctx.fillStyle = p.color;
+                ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size);
+                ctx.restore();
+
+                if (p.y > canvas.height) p.y = -10;
+            });
+            animationFrame = requestAnimationFrame(update);
+        }
+        update();
+        setTimeout(() => {
+            cancelAnimationFrame(animationFrame);
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+        }, 4000);
+    }
+</script>
+
+</body>
+</html>
